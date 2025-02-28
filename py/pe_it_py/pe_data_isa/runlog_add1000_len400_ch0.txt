@@ -1,0 +1,77 @@
+the isa:58000000 the type is  DCFG
+the isa:4c001000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000000,the hex:0,the dec:0 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c041000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000001,the hex:1,the dec:1 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c081000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000010,the hex:2,the dec:2 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c0c1000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000011,the hex:3,the dec:3 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c101000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000100,the hex:4,the dec:4 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c141000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000101,the hex:5,the dec:5 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c181000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000110,the hex:6,the dec:6 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c1c1000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00000111,the hex:7,the dec:7 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c201000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001000,the hex:8,the dec:8 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c241000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001001,the hex:9,the dec:9 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c281000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001010,the hex:a,the dec:10 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c2c1000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001011,the hex:b,the dec:11 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c301000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001100,the hex:c,the dec:12 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c341000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001101,the hex:d,the dec:13 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c381000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001110,the hex:e,the dec:14 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c3c1000 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00001111,the hex:f,the dec:15 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0001000000000000,the hex:1000,the dec:4096 ; 
+
+the isa:4c880001 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00100010,the hex:22,the dec:34 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0000000000000001,the hex:1,the dec:1 ; 
+
+the isa:4c8c0001 the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00100011,the hex:23,the dec:35 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0000000000000001,the hex:1,the dec:1 ; 
+
+the isa:4c8003ff the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00100000,the hex:20,the dec:32 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0000001111111111,the hex:3ff,the dec:1023 ; 
+
+the isa:4c8403ff the type is  SET
+OPCODE: the bin:010011,the hex:13,the dec:19 ; r_dst: the bin:00100001,the hex:21,the dec:33 ; offset: the bin:00,the hex:0,the dec:0 ; imm: the bin:0000001111111111,the hex:3ff,the dec:1023 ; 
+
+the isa:2c000000 the type is  CPY
+OPCODE: the bin:001011,the hex:b,the dec:11 ; SUR_IDX: the bin:000,the hex:0,the dec:0 ; LINE_IDX: the bin:000,the hex:0,the dec:0 ; LEN_IDX: the bin:0,the hex:0,the dec:0 ; LOW_PECISION: the bin:0000,the hex:0,the dec:0 ; 
+
+the isa:fc000000 the type is  END
+OPCODE: the bin:111111,the hex:3f,the dec:63 ; 
+
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+the isa:00000000 the type is  UNKNOWN
+push the add1000_len400_ch0_divi.txt
