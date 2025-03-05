@@ -1,0 +1,16 @@
+//============================================================
+//File  :${uvc}_param.sv
+//Author:${usr_name}
+//Date  :${today}
+//============================================================
+`ifndef ${uvc.upper()+'_PARAM_SV'} 
+`define ${uvc.upper()+'_PARAM_SV'}
+package ${uvc+'_param'};
+
+  //list your signal below:
+
+  ////parameter AAAA    = 16;
+  ////parameter BBBB    = 8;
+
+endpackage:${uvc+'_'}param
+`endif

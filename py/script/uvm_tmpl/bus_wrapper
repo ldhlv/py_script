@@ -1,0 +1,26 @@
+//=======================================
+//File  :${mod+'_'}bus_wrapper.sv
+//Author:${usr_name}
+//Date  :${today}
+//=======================================
+`ifndef ${mod.upper()+'_'}BUS_WRAPPER_SV
+`define ${mod.upper()+'_'}BUS_WRAPPER_SV
+interface ${mod+'_'}bus_wrapper();
+  %if ral_agnt is not None:
+  virtual ral_${mod+'_'}bus ${ral_agnt+'_'}bus;
+  virtual ${mod+'_'}hws_bus hws_bus;
+  %endif
+  %for uvc in uvcs:
+  virtual ${uvc+'_'}io ${uvc+'_'}bus;
+  %endfor
+  %for uvc in uvc_arrays.keys():
+  virtual ${uvc+'_'}io ${uvc+'_'}bus[${uvc_arrays[uvc]}];
+  %endfor
+  %for env in envs:
+  virtual ${env+'_'}bus_wrapper ${env+'_'}bus;
+  %endfor
+  %for env in env_arrays.keys():
+  virtual ${env+'_'}bus_wrapper ${env+'_'}bus[${env_arrays[env]}];
+  %endfor
+endinterface
+`endif 

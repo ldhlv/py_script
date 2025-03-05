@@ -1,0 +1,54 @@
+//============================================================
+//File  :${uvc}_io.sv
+//Author:${usr_name}
+//Date  :${today}
+//============================================================
+`ifndef ${uvc.upper()+'_IO_SV'} 
+`define ${uvc.upper()+'_IO_SV'}
+import ${uvc+'_'}param::*;
+%if is_for_ral_agnt:
+interface ral_${blk.name}_bus(
+  input logic clk,
+  input logic rst
+  );
+  bit has_chk = 1;
+  bit has_cov = 1;
+  csr_bus::${blk.name}_bus_iport_s iports;
+  csr_bus::${blk.name}_bus_oport_s oports;
+
+  clocking drv @(posedge clk);
+    default input #10ps output #10ps;
+    output iports;
+    input  oports;
+    input  rst;
+  endclocking // drv
+  clocking mon @(posedge clk);
+    default input #10ps;
+    input iports;
+    input oports;
+    input rst;
+  endclocking // mon
+
+  initial begin
+    iports = '0;
+  end
+endinterface // ral_${blk.name}_bus
+%else:
+interface ${uvc+'_io'}(input logic clk, input logic rst);
+  bit has_chk = 1;
+  bit has_cov = 1;
+  //list your signal below:
+
+  clocking drv@(posedge clk);
+    default input #10ps output #10ps;
+    input rst;
+  endclocking
+
+  clocking mon@(posedge clk);
+    default input #10ps;
+    input  rst;
+  endclocking
+endinterface
+%endif
+
+`endif
