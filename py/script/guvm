@@ -1,0 +1,272 @@
+#!/usr/bin/python3
+import os
+import re
+from mako.lookup import TemplateLookup
+import subprocess
+import datetime
+import argparse
+import json
+parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--jfile', type=str, help='specifies json file:-f example.json')
+parser.add_argument('-e', '--env' , action='store_true', default=False, help='whether to generate env and test suite')
+parser.add_argument('-d', '--display', action='store_true', default=False, help='whether to display infos or not')
+args = parser.parse_args()
+
+curr_dir = os.getcwd()
+#print('curr_dir:%s ' % curr_dir)
+proj_root = os.getenv('PROJ_FE_DV') 
+proj_bin  = os.getenv('PROJ_SCRIPT') 
+#try:
+#  proj_root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel']).strip().decode()
+#except:
+#  print('Ops!Current directory is not a valid git-repos')
+#  exit()
+  
+tmpl_dir  = os.path.join(proj_bin,'uvm_tmpl')
+if args.jfile is not None:
+  json_file = os.path.join(os.getcwd(), args.jfile)
+  if not os.path.isfile(json_file):
+    print('input json file:%s not found' % json_file)
+    exit(1)
+os.chdir(proj_bin)    
+lookup = TemplateLookup(directories=[tmpl_dir], module_directory='.')
+  
+with open(json_file, 'r') as ld_f:
+  cfg = json.load(ld_f)
+  level = cfg['level']
+  mod  = cfg['mod']
+  path = os.path.join(level, mod)
+  user = cfg['usr_name']
+  agnts = cfg['uvcs']
+  regmodel = cfg['regmodel']
+  ral_agnt = cfg['ral_agnt']
+  subsys = cfg['subsys']
+  uvcs = []
+  envs = []
+  uvc_arrays = {}
+  env_arrays = {}
+  is_for_ral_agnt = False
+  refm = cfg['refm']
+  scb  = cfg['scoreboard']
+  iports = cfg['iports']
+  oports = cfg['oports']
+  in_item  = []  #in_item, out_item for refm, scb, and base_tc
+  out_item = []  #in_item, out_item for refm, scb, and base_tc
+  for uvc in agnts:
+    if re.match(r'\w+\[([0-9]+)\]', uvc.strip()):
+      tmp = uvc.strip().split('[')[0]
+      dem = re.match(r'\w+\[([0-9]+)\]', uvc.strip()).group(1)
+      uvc_arrays[tmp] = dem
+    else:
+      uvcs.append(uvc)
+  for env in subsys:
+    if re.match(r'\w+\[([0-9]+)\]', env.strip()):
+      tmp = env.strip().split("[")[0]
+      dem = re.match(r'\w+\[([0-9]+)\]', env.strip()).group(1)
+      env_arrays[tmp] = dem
+    else:
+      envs.append(env)
+    
+  mod_dir = os.path.join(proj_root, 'verif', level, mod)
+  if not os.path.exists(mod_dir):
+    os.makedirs(mod_dir)
+  # generate uvc-agnt,drvr,monr,pkg,item
+  today = datetime.datetime.today().strftime('%Y.%m.%d')
+  for uvc in uvcs:
+    if 'rst' in uvc or 'reset' in uvc:
+      continue
+    if 'in' in uvc:
+      in_item.append(uvc+'_item')     
+    if 'out' in uvc:
+      out_item.append(uvc+'_item')
+
+    uvc_dir  = os.path.join(proj_root, 'verif', level, mod, 'uvcs', '%s_uvc'%uvc)
+    tmpl= lookup.get_template('agnt_tmpl.sv')
+    with open(uvc+'_agnt.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('drvr_tmpl.sv')
+    with open(uvc+'_drvr.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('monr_tmpl.sv')
+    with open(uvc+'_monr.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('item_tmpl.sv')
+    with open(uvc+'_item.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('seq_tmpl.sv')
+    with open(uvc+'_seq.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('pkg_tmpl.sv')
+    with open(uvc+'_pkg.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt,is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('intf_tmpl')
+    with open(uvc+'_io.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today))
+    tmpl = lookup.get_template('param_tmpl')
+    with open(uvc+'_param.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today))
+
+    if not os.path.isdir(uvc_dir):
+      os.makedirs(uvc_dir)
+    os.system('mv %s_*.sv %s' % (uvc, uvc_dir))
+
+  if len(in_item)==0:
+    in_item.append(uvcs[0])
+  if len(out_item)==0:
+    out_item.append(uvcs[0])
+
+  for uvc in uvc_arrays.keys():
+    if 'rst' in uvc or 'reset' in uvc:
+      continue
+    uvc_dir  = os.path.join(proj_root, 'verif', level, mod, 'uvcs', '%s_uvc'%uvc)
+    tmpl= lookup.get_template('agnt_tmpl.sv')
+    with open(uvc+'_agnt.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('drvr_tmpl.sv')
+    with open(uvc+'_drvr.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod,uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt,is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('monr_tmpl.sv')
+    with open(uvc+'_monr.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod,uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('pkg_tmpl.sv')
+    with open(uvc+'_pkg.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('item_tmpl.sv')
+    with open(uvc+'_item.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today,ral_agnt=ral_agnt,is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('seq_tmpl.sv')
+    with open(uvc+'_seq.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('intf_tmpl')
+    with open(uvc+'_io.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today))
+    tmpl = lookup.get_template('param_tmpl')
+    with open(uvc+'_param.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today))
+
+    if not os.path.isdir(uvc_dir):
+      os.makedirs(uvc_dir)
+    os.system('mv %s_*.sv %s' % (uvc, uvc_dir))
+
+
+  is_for_ral_agnt = True
+  if ral_agnt != None and ral_agnt != "":
+    uvc_dir  = os.path.join(proj_root, 'verif', level, mod, 'uvcs', 'ral_agnt_uvc')
+    uvc = ral_agnt
+    tmpl = lookup.get_template('adpt_tmpl.sv')
+    with open(uvc+'_adpt.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc, usr_name=user, today=today))
+    tmpl = lookup.get_template('agnt_tmpl.sv')
+    with open(uvc+'_agnt.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod,uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('drvr_tmpl.sv')
+    with open(uvc+'_drvr.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt,is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('monr_tmpl.sv')
+    with open(uvc+'_monr.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('pkg_tmpl.sv')
+    with open(uvc+'_pkg.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('item_tmpl.sv')
+    with open(uvc+'_item.sv', 'w') as fd:
+      fd.write(tmpl.render(uvc=uvc,usr_name=user, today=today, ral_agnt=ral_agnt, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('seq_tmpl.sv')
+    with open(uvc+'_seq.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod, uvc=uvc,usr_name=user, today=today, is_for_ral_agnt=is_for_ral_agnt))
+    tmpl = lookup.get_template('intf_tmpl')
+    with open(uvc+'_io.sv', 'w') as fd:
+      fd.write(tmpl.render(mod=mod,uvc=uvc,usr_name=user, today=today))
+
+    if not os.path.isdir(uvc_dir):
+      os.makedirs(uvc_dir)
+    os.system('mv %s_*.sv %s' % (uvc, uvc_dir))
+
+  os.system('rm *.sv.py intf_tmpl.py')
+  if args.env:
+    # generate env, testcase
+    env_dir  = os.path.join(mod_dir,'env')
+    if not os.path.isdir(env_dir):
+      os.makedirs(env_dir)
+    #scb.sv
+    if scb:
+      tmpl = lookup.get_template('scbd_tmpl.sv')
+      with open("%s_scb.sv"%mod, 'w') as fd:
+        fd.write(tmpl.render(mod=mod, usr_name=user, today=today, out_item=out_item))
+      os.system('mv '+mod+'_scb.sv '+env_dir)
+
+    #ref.sv
+    if refm:
+      tmpl = lookup.get_template('refm_tmpl.sv')
+      with open("%s_refm.sv"%mod, 'w') as fd:
+        fd.write(tmpl.render(mod=mod, usr_name=user, today=today, in_item=in_item, out_item=out_item))
+      os.system('mv '+mod+'_refm.sv '+env_dir)
+
+    #env.sv
+    tmpl = lookup.get_template('env_tmpl.sv')
+    with open("%s_env.sv"%mod, 'w') as fd:
+      fd.write(tmpl.render(mod=mod, usr_name=user, today=today, uvcs = uvcs, uvc_arrays=uvc_arrays, regmodel= regmodel, ral_agnt=ral_agnt, envs= envs, env_arrays=env_arrays, iports=iports, oports=oports, refm=refm, scb=scb))
+    os.system('mv '+mod+'_env.sv '+env_dir)
+
+    #env_pkg.sv
+    tmpl = lookup.get_template('env_pkg_tmpl.sv')
+    with open("%s_env_pkg.sv"%mod, 'w') as fd:
+      fd.write(tmpl.render(mod=mod, usr_name=user, today=today, uvcs = uvcs, uvc_arrays=uvc_arrays, ral_agnt=ral_agnt, envs=envs, env_arrays=env_arrays, regmodel=regmodel, refm=refm, scb=scb))
+    os.system('mv '+mod+'_env_pkg.sv '+env_dir)
+
+    #bus.sv
+    tmpl = lookup.get_template('bus_wrapper')
+    with open("%s_bus_wrapper.sv"%mod, 'w') as fd:
+      fd.write(tmpl.render(mod=mod, usr_name=user, today=today, uvcs = uvcs, uvc_arrays=uvc_arrays, ral_agnt=ral_agnt, envs=envs, env_arrays=env_arrays))
+    os.system('mv '+mod+'_bus_wrapper.sv '+env_dir)
+
+    #case
+    case_dir = os.path.join(mod_dir, 'tc')
+    if not os.path.isdir(case_dir):
+      os.makedirs(case_dir)
+    tmpl = lookup.get_template('case_tmpl.sv')
+    with open("%s_base.sv"%mod, 'w') as fd:
+      fd.write(tmpl.render(mod=mod, usr_name=user, today=today, uvcs=uvcs, uvc_arrays=uvc_arrays, in_item=in_item))
+    os.system('mv '+mod+'_base.sv '+case_dir)
+    tmpl = lookup.get_template('case_pkg_tmpl.sv')
+    with open('%s_case_pkg.sv'%mod, 'w') as fd:
+      fd.write(tmpl.render(mod=mod, usr_name=user, today=today, uvcs=uvcs, uvc_arrays=uvc_arrays))
+    os.system('mv '+mod+'_case_pkg.sv '+case_dir)
+
+    #sequences_lib.list
+    seq_dir = os.path.join(mod_dir, 'seqs')
+    if not os.path.exists(seq_dir):
+      os.makedirs(seq_dir)
+#    tmpl = lookup.get_template('seq_pkg_tmpl.sv')
+#    with open('%s_seqs_pkg.sv'%mod, 'w') as fd:
+#      fd.write(tmpl.render(mod=mod, usr_name=user, today=today, uvcs=uvcs, uvc_arrays=uvc_arrays, envs=envs, env_arrays=env_arrays))
+#    os.system('mv %s_seqs_pkg.sv %s'%(mod, seq_dir))
+#
+    tb_dir = os.path.join(mod_dir, 'top')
+    if not os.path.isdir(tb_dir):
+      os.makedirs(tb_dir)
+    tmpl = lookup.get_template('tb_file')
+    with open('tb.f', 'w') as fd:
+      fd.write(tmpl.render(path=path, mod=mod, uvcs=uvcs, uvc_arrays=uvc_arrays, ral_agnt=ral_agnt, envs=envs, env_arrays=env_arrays, regmodel=regmodel))
+    os.system('mv tb.f '+tb_dir)
+
+    # generate top
+    tmpl = lookup.get_template('testbench')
+    with open('testbench.sv', 'w') as fd:
+      fd.write(tmpl.render(usr_name=user, today=today, mod=mod, uvcs=uvcs, uvc_arrays=uvc_arrays,ral_agnt=ral_agnt))
+    os.system('mv testbench.sv '+tb_dir)
+    tmpl = lookup.get_template('wavedump')
+    with open('wave.tcl', 'w') as fd:
+      fd.write(tmpl.render(mod=mod))
+    os.system('mv wave.tcl '+tb_dir)
+    os.system('rm -rf *.sv.py tb_file.py testbench.py wavedump.py bus_wrapper.py __pycache__')
+    
+    #gen opts_cfg directory
+    tb_cfg = os.path.join(mod_dir, 'opts_cfg')
+    tc_opts = os.path.join(tb_cfg, 'tb_cfg')
+    if not os.path.isdir(tb_cfg):
+      os.makedirs(tb_cfg)
+      os.system('touch '+tc_opts)
+
+  print("Finish gen env %s,  path: fe/dv/verif/%s\n" %(mod, path))
+os.chdir(curr_dir)
