@@ -1,0 +1,78 @@
+// Specify the compile-time options below:
+-timescale=1ns/10ps
++lint=TFIPC-L
+
++incdir+$UVM_CRG
++incdir+$PROJ_FE_DV/vrf_lib/common_lib
++incdir+$PROJ_FE_DV/verif/${path}/env
++incdir+$PROJ_FE_DV/verif/${path}/seqs 
++incdir+$PROJ_FE_DV/verif/${path}/tc
++incdir+$PROJ_FE_DV/verif/${path}/top
++incdir+$PROJ_FE_DV/verif/${path}/ral
+%for uvc in uvcs:
+  %if 'rst' in uvc or 'reset' in uvc:
+
+  %else:
++incdir+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}
+  %endif
+%endfor
+%for uvc in uvc_arrays.keys():
+  %if "rst" in uvc or "reset" in uvc:
+
+  %else:
++incdir+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}
+  %endif
+%endfor
+
+
+
+// Specify the filelist for RTL
+///////////////////////
+//-F $PROJ_FE_DE/*TODO*/
+//-f $PROJ_ROOT/common/lib/sim_model/asr_std_cell_model/asr_std_cell_model.f
+//-f $PROJ_ROOT/common/lib/sim_model/mem/mem_cell/mem_cell.f
+//-f $PROJ_ROOT/common/lib/sim_model/mem/mem_cell_7nm/mem_cell.f
+//-f $PROJ_FE_DE/src/common/common_lite.f
+///////////////////////
+
+// Include common uvcs
+$UVM_CRG/crg_pkg.sv
+$PROJ_FE_DV/vrf_lib/common_lib/base_uvc/base_pkg.sv
+$PROJ_FE_DV/vrf_lib/common_lib/cal_uvc/cal_pkg.sv
+
+%if ral_agnt is not None:
+$PROJ_FE_DV/verif/${path}/uvcs/${ral_agnt}_uvc/${ral_agnt}_pkg.sv
+%endif
+
+%if regmodel is not None:
+// ral_block filelist
+$PROJ_FE_DV/verif/${path}/ral/ral_${mod}.sv
+%endif
+%for uvc in uvcs:
+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}/${uvc+'_'}param.sv
+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}/${uvc+'_'}io.sv
+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}/${uvc+'_'}pkg.sv
+%endfor
+%for uvc in uvc_arrays.keys():
+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}/${uvc+'_'}param.sv
+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}/${uvc+'_'}io.sv
+$PROJ_FE_DV/verif/${path}/uvcs/${uvc+'_uvc'}/${uvc+'_'}pkg.sv
+%endfor
+
+%for env in envs:
+$PROJ_FE_DV/verif/${env}/env/${env+'_'}pkg.sv
+%endfor
+
+%for env in env_arrays.keys():
+$PROJ_FE_DV/verif/${env}/env/${env+'_'}pkg.sv
+%endfor
+
+$PROJ_FE_DV/verif/${path}/env/${mod+'_'}bus_wrapper.sv
+$PROJ_FE_DV/verif/${path}/env/${mod+'_'}env_pkg.sv
+
+// Include testcase files
+$PROJ_FE_DV/verif/${path}/tc/${mod+'_'}case_pkg.sv
+
+// Include testbench top file 
+$PROJ_FE_DV/verif/${path}/top/testbench.sv
+

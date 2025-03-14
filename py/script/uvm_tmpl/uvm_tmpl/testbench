@@ -1,0 +1,49 @@
+//=======================================
+//File  :testbench.sv
+//Author:${usr_name}
+//Date  :${today}
+//=======================================
+import uvm_pkg::*;
+import ${mod+'_'}case_pkg::*;
+
+module top();
+  import uvm_pkg::*;
+  ${mod+'_'}bus_wrapper bus();
+  crg_if  crg_if_io();
+  %for uvc in uvcs:
+  ${uvc+'_'}io ${uvc}(crg_if_io.clks[0], crg_if_io.rsts[0]); //TODO, CHECK
+  %endfor
+  %for uvc in uvc_arrays.keys():
+  ${uvc+'_'}io ${uvc}(crg_if_io.clks[0], crg_if_io.rsts[0]); //TODO, CHECK
+  %endfor
+  %if ral_agnt is not None:
+  ral_${mod+'_'}bus ${ral_agnt}(crg_if_io.clks[0], crg_if_io.rsts[0]);
+  ${mod+'_'}hws_bus hws(crg_if_io.clks[0], crg_if_io.rsts[0]);
+  %endif
+
+  initial begin
+    uvm_config_db#(virtual ${mod+'_'}bus_wrapper)::set(null, "uvm_test_top.env", "bus", bus);
+    uvm_config_db#(virtual crg_if)::set(null, "*", "crg_if_beta", crg_if_io);
+    
+    //Connect virtual interface to physical interface
+    %for uvc in uvcs:
+    bus.${uvc+'_'}bus = ${uvc};
+    %endfor
+    %for uvc in uvc_arrays.keys():
+    bus.${uvc+'_'}bus = ${uvc};
+    %endfor
+    %if ral_agnt is not None:
+    bus.${ral_agnt+'_'}bus = ${ral_agnt};
+    bus.hws_bus = hws;
+    %endif
+    // Define subenv inferface below, if needed:
+    
+    $timeformat(-9, 1, "ns", 10);
+    run_test();
+  end 
+
+  //TODO Instantiate your DUT below
+ 
+
+
+endmodule

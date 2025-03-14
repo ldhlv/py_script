@@ -1,0 +1,12 @@
+call {$fsdbAutoSwitchDumpfile(1024, "wave.fsdb", 10)}
+call {$fsdbDumpvars(0, top, "+all")}
+call {$fsdbDumpMDA}
+call {$fsdbDumpSVA}
+for {set x 0} {$x < 100} {incr x} {
+    run 1us
+    call {$fsdbDumpflush}
+}
+call {$fsdbDumpflush}
+
+run
+quit
